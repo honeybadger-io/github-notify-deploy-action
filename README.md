@@ -10,7 +10,7 @@ Input Name | Default | Required? | Description
 ------------ | ------------- | ------------ | -------------
 api_key | N/A | Y | The Honeybadger project API key
 environment | production | N | The deployment environment
-endpoint | https://api.honeybadger.io/v1/deploys | N | The deploy submission endpoint. Only used for testing
+endpoint | https://api.honeybadger.io/v1/deploys | N | The deploy submission endpoint
 
 #### Example
 
