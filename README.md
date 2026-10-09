@@ -2,6 +2,10 @@
 
 Sending deployment notifications to Honeybadger allows your team to associate spikes in errors to changes that were deployed.
 
+#### Requirements
+
+The action runs `curl` with `sh` on the runner. GitHub-hosted runners have both. On a self-hosted runner, or in a job that uses a `container`, make sure both are installed.
+
 #### Inputs
 
 Use these inputs to customise the action.

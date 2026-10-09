@@ -19,7 +19,7 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - shell: bash
+    - shell: sh
       env:
         INPUT_API_KEY: ${{ inputs.api_key }}
         INPUT_ENVIRONMENT: ${{ inputs.environment }}
