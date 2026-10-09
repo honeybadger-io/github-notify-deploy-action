@@ -17,9 +17,18 @@ inputs:
     default: "https://api.honeybadger.io/v1/deploys"
 
 runs:
-  using: 'docker'
-  image: 'Dockerfile'
-  args:
-    - ${{ inputs.api_key }}
-    - ${{ inputs.environment }}
-    - ${{ inputs.endpoint }}
+  using: 'composite'
+  steps:
+    - shell: bash
+      env:
+        INPUT_API_KEY: ${{ inputs.api_key }}
+        INPUT_ENVIRONMENT: ${{ inputs.environment }}
+        INPUT_ENDPOINT: ${{ inputs.endpoint }}
+      run: |
+        curl -sS \
+          "$INPUT_ENDPOINT" \
+          -F "api_key=$INPUT_API_KEY" \
+          -F "deploy[environment]=$INPUT_ENVIRONMENT" \
+          -F "deploy[local_username]=$GITHUB_ACTOR" \
+          -F "deploy[revision]=$GITHUB_SHA" \
+          -F "deploy[repository]=git@github.com:$GITHUB_REPOSITORY.git"
