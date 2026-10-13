@@ -1,0 +1,64 @@
+name: Test
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Responds to POST /<status> with that HTTP status code.
+      - name: Start mock endpoint
+        run: |
+          cat > "$RUNNER_TEMP/server.py" <<'EOF'
+          from http.server import BaseHTTPRequestHandler, HTTPServer
+
+          class Handler(BaseHTTPRequestHandler):
+              def do_POST(self):
+                  self.rfile.read(int(self.headers.get('Content-Length', 0)))
+                  self.send_response(int(self.path.strip('/')))
+                  self.end_headers()
+                  self.wfile.write(b'{}')
+
+          HTTPServer(('127.0.0.1', 8080), Handler).serve_forever()
+          EOF
+          python3 "$RUNNER_TEMP/server.py" &
+          for i in $(seq 1 20); do
+            curl -s -o /dev/null http://127.0.0.1:8080 && break
+            sleep 0.5
+          done
+
+      - name: Successful response
+        uses: ./
+        with:
+          api_key: test
+          endpoint: http://127.0.0.1:8080/201
+
+      - name: Client error response
+        id: client_error
+        continue-on-error: true
+        uses: ./
+        with:
+          api_key: test
+          endpoint: http://127.0.0.1:8080/403
+
+      - name: Server error response
+        id: server_error
+        continue-on-error: true
+        uses: ./
+        with:
+          api_key: test
+          endpoint: http://127.0.0.1:8080/500
+
+      - name: Check error responses failed
+        env:
+          CLIENT_ERROR: ${{ steps.client_error.outcome }}
+          SERVER_ERROR: ${{ steps.server_error.outcome }}
+        run: |
+          echo "4xx outcome: $CLIENT_ERROR"
+          echo "5xx outcome: $SERVER_ERROR"
+          test "$CLIENT_ERROR" = failure
+          test "$SERVER_ERROR" = failure

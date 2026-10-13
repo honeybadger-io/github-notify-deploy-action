@@ -25,7 +25,7 @@ runs:
         INPUT_ENVIRONMENT: ${{ inputs.environment }}
         INPUT_ENDPOINT: ${{ inputs.endpoint }}
       run: |
-        curl -sS \
+        curl -sS --fail \
           "$INPUT_ENDPOINT" \
           -F "api_key=$INPUT_API_KEY" \
           -F "deploy[environment]=$INPUT_ENVIRONMENT" \
